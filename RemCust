@@ -1,0 +1,120 @@
+#!/bin/bash
+
+# Author: Grigore Oboroceanu
+# Version: 18-04-2016
+
+# This script will allow the user to delete customer details entries from the CustomerDetails file
+# If specified entry has no match in the customer list - a warning message is issued and program halted
+# A prompt is issued before attempting to delete existing customer
+end=0
+while [ $end -ne 1 ]
+do
+clear
+echo
+echo -e "    \e[1;96m<< DELETE CUSTOMER DETAILS >>\e[0m"
+echo
+# user has the choice to proceed or return to main menu
+echo -e "\e[31m  Enter  \e[0m[0]\e[31m to RETURN to main menu at ANY STAGE!\e[0m\n  or "
+echo -n -e "\e[1;96m  Enter  \e[0m[1]\e[1;96m to proceed\e[0m""\n\n  [Enter] "
+read answer
+echo
+
+case "$answer" in
+  1) # user can search a customer in address book by a keyword or any part of the customer record string
+     echo -n -e "\e[96m  Search customer details you wish to delete:\e[0m\n\n  (\e[96mSearch by\e[0m Name, Alias \e[96mor\e[0m Address)\n\n  [Search] "
+     read details
+     echo
+
+     # if no record found - a message is issued asking to try again or exit
+     until grep -i -q "$details" CustomerDetails; do
+       echo
+       echo -e "  \e[31mNo record found!\e[0m" 
+       echo
+       echo -e -n "\e[96m  Please search again!\e[0m\n  or \n  \e[31mEnter\e[0m   [0]\e[31m to return to main menu\e[0m \n\e[96m  [Search]\e[0m "
+       read details
+      done
+         
+       if [ "$details" == 0 ];
+         then
+         sleep 1
+         echo
+         echo -e "\e[1;96m  Returning to main menu!\e[0m "
+         sleep 2
+         clear
+         exit
+       else
+       # search result is displayed with line numbers to facilitate deleting specific entry if more than one returned
+       grep -i -n "$details" CustomerDetails
+       echo
+       echo -n -e "  \e[96mDo you wish to delete any of theese records?\e[0m\n\n  \e[96mEnter \e[0m[y|n]\e[96m\e[0m "
+       read answer
+
+       case "$answer" in 
+           y|Y) echo
+              # a record line containing the search string may be deleted according to its number or by specifying the search string  
+              echo -n -e "\e[96m  Which record do you wish to delete?\n\n  Enter [\e[0m\e[31mLine number\e[0m\e[96m]\e[0m\n  or  \n  \e[96mEnter [\e[0m\e[31mKeyword\e[0m\e[96m]\e[0m\n  "
+              read details
+              x="$details"
+              echo
+              # a warning message issued before attempting to delete a record     
+              echo  
+              echo -e "\e[1;96m  Are you sure you want to delete this customer?\e[0m "
+              echo
+              echo -e -n "\e[1;31m  W_A_R_N_I_N_G ! \n\n  This will delete customer details from file!\e[0m \n\n\e[96m  Enter \e[0m[y|n] "
+              read choice
+              echo
+              
+              case "$choice" in 
+                y|Y) # deleting the entire line containing the search result string   
+                     if [[ "$details" =~ ^[0-9]+$ ]];
+                     then
+                       CUSTOMERS="CustomerDetails"
+                       # removes the specified number line from CustomerDetails
+                       sed -i "${details}d" $CUSTOMERS
+                       echo
+                       echo -e "  \e[31mCustomer details deleted!\e[0m""\n  \e[1;96mReturning to main menu\e[0m"
+                       sleep 2
+                       clear
+                       exit
+                     else 
+                       # removes the line containing specified string in CustomerDetails
+                       echo "$(grep -i -v "$details" CustomerDetails)" > CustomerDetails
+
+                       sleep 1
+                       echo
+                       echo -e "  \e[31mCustomer details deleted!\e[0m""\n \n  \e[1;96mReturning to main menu\e[0m "
+                       echo
+                       sleep 3
+                       clear
+                       exit
+                     fi
+                     ;;
+      
+                  *) sleep 1 
+                     echo
+                     echo -e "  \e[31mOperation aborted!\e[0m\n \n  \e[1;96mReturning to the main Menu!\e[0m"
+                     sleep 3
+                     clear
+                     exit
+                     ;;
+              esac
+              ;;
+
+       0|*)  echo
+             echo -e "  \e[31mOperation aborted\e[0m!\n \n  \e[1;96mReturning to the main Menu!\e[0m"
+             sleep 2
+             clear
+             exit
+             ;;  
+      esac
+      fi
+      ;;
+
+ 0|*) echo
+      echo -e "\e[1;96m  Returning to main menu!\e[0m"
+      sleep 2
+      clear
+      exit
+      ;;
+esac  
+done

@@ -1,0 +1,89 @@
+#!/bin/bash
+
+# Author: Grigore Oboroceanu
+# Version: 14/04/2016
+
+# A script that allows searching for a customer in Customer Details file
+# Search may be performed based on customer name, address or any keyword contained in the Customer details field
+until [[ $end -eq 1 ]];
+do
+clear
+echo
+echo -e "\e[1;96m    << SEARCHING CUSTOMER RECORDS >>\e[0m"
+echo
+echo -e "\e[96m  Please enter customer details to search:\e[0m \n"
+echo -e "\e[96m  (\e[0mname \e[96m or \e[0m alias, e-mail \e[96m or \e[0m address\e[96m)\e[0m \n  \e[96mor\e[0m"
+echo -n -e "\e[31m  Enter   [\e[0m0\e[31m] to return to main menu!\e[0m\n  \e[96m[Search]\e[0m "
+read search
+
+if [[ "$search" == 0 ]];
+  then
+  sleep 1
+  echo
+  echo -e "\e[1;96m  Returning to main menu!\e[0m"
+  sleep 2
+  clear
+  exit
+fi
+
+# if no details found - a message is displayed and application returns to main menu
+if ! grep -i -q "$search" CustomerDetails;
+  then
+    sleep 1
+    echo
+    echo -e "\e[1;31m  No record found for\e[0m: $search"
+    echo
+    echo -n -e "\e[96m  Do you wish to search another customer?\n  Enter\e[0m [y|n] "
+    read choice
+      case "$choice" in
+        y|Y) end=0
+             echo
+             echo -e "\e[1;96m  Returning to search\e[0m"
+
+             #resetting all variables to allow for new search 
+             unset search
+             unset choice
+             sleep 1
+             ;;
+
+          *) sleep 1
+             echo
+             echo -e "\e[1;96m  Returning to main menu\e[0m"
+             sleep 2
+             clear
+             exit
+             ;;
+      esac
+  else
+    echo
+    # search results will be printed on screen
+    grep -i "$search" CustomerDetails | awk ' {print $4"\n", $1"\n", $2, $3"\n", $5"\n", $6} '
+    echo
+    
+    # user has a choice to return to main menu or do another search
+    echo -n -e "\e[31m  Enter  [\e[0m0\e[31m] to return to main menu\e[0m""\n  or \n"
+    echo -n -e "\e[96m  Enter  [\e[0m1\e[96m] to search another customer\e[0m""\n\n  [Enter] "
+    read answer
+
+    case "$answer" in
+      1) echo
+         echo -e "\e[1;96m  Returning to search\e[0m" 
+
+         #resetting all variables to allow for new search 
+         unset search
+         unset choice
+         unset answer
+         sleep 1
+         ;;
+
+    0|*) sleep 1
+         echo
+         echo -e "\e[1;96m  Returning to main menu!\e[0m" 
+         sleep 2
+         clear
+         exit
+         ;;
+    esac
+fi
+clear
+done

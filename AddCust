@@ -1,0 +1,235 @@
+#!/bin/bash
+
+# Author: Grigore Oboroceanu
+# Version: 18-04-2016 
+
+# This script allows adding new customer details to Address Book 
+# It takes an input from the user, creates a CustomerDetails file where all details are stored
+
+end=0
+while [ $end -ne 1 ];
+do
+clear
+echo 
+echo -e "    \e[1;96m<< EDIT CUSTOMER DETAILS BOOK >> \e[0m"
+echo
+# user has a choice to proceed or return to main menu
+echo -e "  \e[31mEnter\e[0m  [0]\e[31m to RETURN to main menu at ANY STAGE\e[0m""\n  or "
+echo -n -e "\e[1;96m  Enter  \e[0m[1]\e[1;96m to proceed\e[0m""\n\n  [Enter] "
+read answer
+echo
+
+case "$answer" in
+  1) echo
+     echo -e "\e[1;96m  << Please enter new customer details >> \e[0m "
+         
+     # customer e-mail addresses should be in valid e-mail format and unique
+     # next line checks if a valid email format entered and if e-mail address already exists in address book
+     # it will warn user and continue asking for new entry
+     until [[ $email == ?*@?*.?* ]] && [ $entry -le 0 ]; do
+       echo
+       read -p "  E-mail address: " email
+       entry=$(grep -c -i $email CustomerDetails)
+
+       # user may choose return to main menu at this stage
+       if [[ "$email" == 0 ]];
+        then
+          sleep 1
+          echo
+          echo -e "\e[1;96m  Returning to main menu!\e[0m"
+          sleep 2
+          clear
+          exit
+       
+       # check if e-mail address already exists in address book 
+       elif [ $entry -ge 1 ]; then
+        echo
+        echo -e "\e[96m  E-mail address already on file!\e[0m\n\e[31m  Please check and enter a new address!\e[0m\n  \e[96mEnter \e[0m[0]\e[96m to exit!\e[0m"
+        echo
+       elif [[ $email != ?*@?*.?* ]]; then
+        echo
+        echo -e "\e[31m  ERROR! Please enter valid e-mail format!\e[0m\n  \e[96mEnter \e[0m[0]\e[96m to exit!\e[0m"
+      fi
+     done
+         
+     #check that only letters are entered for first name
+     until [[ $fname =~ ^[a-zA-Z]+$ ]]; do 
+       echo
+       read -p "  First name: " fname
+
+       # user may choose to return to main menu at this stage
+       if [[ $fname == 0 ]];
+        then
+          sleep 1
+          echo
+          echo -e "\e[1;96m  Returning to main menu!\e[0m"
+          sleep 2
+          clear
+          exit
+       # if entry contains other than letter symbols a warning message is issued 
+       elif ! [[ $fname =~ ^[a-zA-Z]+$ ]]
+        then
+         echo
+         echo -e "\e[31m  ERROR! This field may contain letters only!\e[0m\n  \e[96mEnter\e[0m[0]\e[96m to exit!\e[0m"
+       fi
+     done
+    
+     #check that only letters are entered for second name
+     until [[ $sname =~ ^[a-zA-Z]+$ ]]; do 
+       echo
+       read -p "  Second name: " sname
+
+       # user may choose to return to main menu at this stage
+       if [[ $sname == 0 ]];
+        then
+          sleep 1
+          echo
+          echo -e "\e[1;96m  Returning to main menu!\e[0m"
+          sleep 2
+          clear
+          exit   
+       elif ! [[ $sname =~ ^[a-zA-Z]+$ ]]
+        then
+         echo
+         echo -e "\e[31m  ERROR! This field may contain letters only!\e[0m\n  \e[96mEnter\e[0m[0]\e[96m to exit!\e[0m"
+         echo
+       fi
+      done
+
+     #checks that only letters are entered for alias 
+     until [[ $alias =~ ^[a-zA-Z]+$ ]]; do
+       echo
+       read -p "  Alias: " alias
+
+       # user may choose to return to main menu at this stage
+       if [[ $alias == 0 ]];
+        then
+          sleep 1
+          echo
+          echo -e "\e[1;96m  Returning to main menu!\e[0m"
+          sleep 2
+          clear
+          exit       
+       elif ! [[ $alias =~ ^[a-zA-Z]+$ ]]
+        then
+         echo
+         echo -e "\e[31m  ERROR! This field may contain letters only!\e[0m\n  \e[96mEnter\e[0m[0]\e[96m to exit!\e[0m"
+       fi
+     done
+
+     #checks that address field is not null
+     until ! [[ -z $address ]]; do
+       echo
+       read -p "  Address: " address
+       if [[ -z $address ]]; then
+         echo
+         echo -e "\e[31m  ERROR! This field can't be blank! Please complete!\e[0m\n  or\n  \e[96mEnter\e[0m[0]\e[96m to exit!\e[0m "
+         
+       # user may choose to return to main menu at this stage
+       elif [[ $address == 0 ]]; then
+          sleep 1
+          echo
+          echo -e "\e[1;96m  Returning to main menu!\e[0m"
+          sleep 2
+          clear
+          exit
+       fi
+     done
+
+     #checks that only integer numbers from 0 to 9 are entered for phone number
+     until [[ $phone =~ ^[0-9]+$ ]]; do
+       echo
+       read -p "  Phone number: " phone
+
+       # user may choose to return to main menu at this stage
+       if [[ $phone == 0 ]];
+        then
+          sleep 1
+          echo
+          echo -e "\e[1;96m  Returning to main menu!\e[0m"
+          sleep 2
+          clear
+          exit
+       elif ! [[ $phone =~ ^[0-9]+$ ]]; then        
+         echo
+         echo -e "\e[31m  ERROR! This field may contain 0 to 9 numbers only!\e[0m\n  \e[96mEnter\e[0m[0]\e[96m to exit!\e[0m"
+       fi
+     done
+     echo
+     echo -n -e "\e[1;96m  Are these details correct?\e[0m\n  \e[31mEnter\e[0m[0]\e[31m to exit!\e[0m\n  "" \n  \e[96mEnter \e[0m[y|n] "
+     read answer
+          
+     # reading the answer ignore case
+     if [ "$answer" = "y" ] || [ "$answer" = "Y" ];
+     then
+       # all details are stored in CustomerDetails file
+       # if file dosen't exist it will be created first
+       if [ -e /CustomerDetails ];
+        then 
+        echo $email $fname $sname $alias $address $phone > CustomerDetails
+       else
+         echo $email $fname $sname $alias $address $phone >> CustomerDetails
+         sleep 1
+         echo
+       fi
+     echo -e "\e[1;96m  New customer details added.\e[0m" "\n\n" 
+     sleep 1
+     echo
+     echo -n -e "\e[1;96m  Do you wish to add another customer?\e[0m\n  \e[96mEnter\e[0m[y|n] "
+     read choice
+
+       case "$choice" in
+        y|Y) sleep 2
+             echo
+             echo -e "\e[1;96m  Proceed to add another customer\e[0m"
+             echo
+             
+             # resetting all local variables to allow new entries
+             unset email 
+             unset fname
+             unset sname
+             unset alias
+             unset address
+             unset phone
+             unset answer
+             unset choice
+             unset entry 
+             ;;
+
+        n|*) sleep 1
+             echo
+             echo -e "\e[1;96m  Returning to main menu!\e[0m"
+             sleep 2
+             clear
+             exit
+             ;;
+        esac
+     else 
+       sleep 1
+       echo
+       echo -e "\e[31m  Customer details not added!\e[0m" "\n\n\e[1;96m  Returning to start!\e[0m "
+
+       # resetting all local variables to allow new entries
+       unset email 
+       unset fname
+       unset sname
+       unset alias
+       unset address
+       unset phone
+       unset answer
+       unset choice
+       unset entry 
+       sleep 2
+       clear
+     fi
+     ;;
+
+  0|*) sleep 1
+       echo
+       echo -e "\e[1;96m  Returning to main menu!\e[0m"
+       sleep 2
+       clear
+       exit
+       ;;
+esac
+done

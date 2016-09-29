@@ -1,0 +1,70 @@
+# !/bin/bash
+
+# Author: Grigore Oboroceanu
+# version: 18-04-2016
+
+# This is a script for creating an Address book, that allows storing new customers details, searching and removing existing customers. 
+# It also provides an option to e-mail any or all of the customers listed in the address book. 
+# User is presented with a number of choices in the Menu
+
+# Menu script is contained within a loop. 
+# Scripts are being called from the menu and specific operations are being executed
+clear
+end=0
+while [ $end -ne 1 ]
+do 
+echo
+echo " ================================================ "          
+echo " *                                              * "                                         
+echo " * Welcome. Please choose one of the following: * " 
+echo " *                                              * "
+echo " * ============================================ * "
+echo " *                                              * "                      
+echo " *          1. Add a new Customer               * "   
+echo " *                                              * "                                                   
+echo " *          2. Remove an existing Customer      * " 
+echo " *                                              * "                                                  
+echo " *          3. Search for a Customer            * " 
+echo " *                                              * "                                                  
+echo " *          4. E-mail a Customer                * " 
+echo " *                                              * "                                                  
+echo " *          5. Exit the main Menu               * " 
+echo " *                                              * "                                                   
+echo " * ============================================ * "
+echo " *          Please enter a number:              * "                         
+echo -n -e " ================================================\n"   "\e[1;96m[Enter]\e[0m   "
+read choice
+  # user is presented with a number of choices which will call specific scripts to perform the action
+  if [ "$choice" = 1 ];
+    then
+    ./AddCust
+  elif [ "$choice" = 2 ];
+    then 
+    ./RemCust
+  elif [ "$choice" = 3 ];
+    then
+    ./SearchCust
+  elif [ "$choice" = 4 ];
+    then
+    ./SendMail
+  elif [ "$choice" = 5 ];
+    then 
+    # local variable 'end' is set to 1 to end the loop and terminate the session
+    end=1
+    sleep 1
+    echo                                                  
+    echo "        This is the end of your session! "              
+    echo
+    echo -e "\e[1;96m             *** Good bye! ***\e[0m"                                 
+    echo
+    sleep 2
+    clear
+  else
+    # a warning message is printed if entry is not 1 - 5 and program returns to start
+    echo
+    echo -e "      \e[1;31mInvalid number entered!\e[0m"
+    echo
+    sleep 1
+    clear
+  fi 
+done

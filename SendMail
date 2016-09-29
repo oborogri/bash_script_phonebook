@@ -1,0 +1,279 @@
+#!/bin/bash
+
+# Author: Grigore Oboroceanu
+# Version: 18-04-2016
+
+# This is a script that allows sending e-mail to one or all the customers listed in the address book
+clear
+end=0
+while [ $end -ne 1 ]
+do
+echo
+echo -e "\e[1;96m    << SENDING E-MAIL >>\e[0m"
+echo
+
+# user has the choice to search a customer e-mail address and send to one [option 1]
+# or send same e-mail to all the customers in the address book [option 0]
+echo -e "\e[96m  Enter  [\e[0m1\e[96m] to search customer's e-mail address\e[0m\n  or"
+echo -e "\e[96m  Enter  [\e[0m2\e[96m] to send e-mail to all customers on file\e[0m\n  or"
+echo -n -e "\e[31m  Enter  [\e[0m0\e[31m] to return to main menu\e[0m""\n\n  [Enter] " 
+read answer
+echo  
+
+case "$answer" in
+	1) sleep 1
+     # search customer by any keyowrd to find out their e-mail details
+     echo -n -e "\e[96m  Search customer\e[0m:\n  [Search] "
+     read search
+     echo
+     if grep -i -q "$search" CustomerDetails;
+       then
+         grep -i "$search" CustomerDetails | awk ' {print $4"\n", $1"\n", $2, $3"\n", $5"\n"}'
+         sleep 1
+         
+         # check entry is a valid e-mail format
+         until [[ "$recipient" == ?*@?*.?* ]]; do
+           echo
+           echo -e "\e[96m  Enter recipient e-mail address\e[0m\n  or"
+           echo -n -e "  \e[31mEnter  [\e[0m0\e[31m] to return to main menu\e[0m\n  \e[96m[Enter]\e[0m "
+           read recipient
+
+           # user has the coice to return to main menu
+           if [ "$recipient" == 0 ];
+           then
+           sleep 2
+           echo
+           echo -e "\e[1;96m  Returning to main menu!\e[0m"
+           sleep 2
+           clear
+           end=1
+           exit
+         fi
+         done
+         
+           echo
+           echo -n -e "\e[96m  Enter e-mail subject\e[0m: \n  [Enter]\n  "
+           read subject
+           echo
+           echo -n -e "\e[96m  Enter e-mail text\e[0m: \n  [Enter]\n  "
+           read text
+           echo
+           echo -n -e "\e[1;31m  This e-mail will be sent to:\e[0m "$recipient"\n  \e[1;96mDo you wish to proceed?\e[0m\n  \e[96mEnter\e[0m [y|n] " 
+           read confirmation
+           case "$confirmation" in
+              y|Y)
+                # sending the e-mail to specified address
+                echo "$text" | mail -s "$subject" "$recipient"
+                sleep 1
+
+                # generating a short report
+                echo
+                echo -e "\e[1;96m  E-mail\e[0m: "$text": \n  \e[1;96mSent successfully\n \e[1;96m To\e[0m: "$recipient" "
+                echo
+                sleep 1
+                echo -e "\e[1;96m  Returning to start\e[0m" 
+
+                #resetting all variables to allow new entries
+                unset answer
+                unset search
+                unset recipient
+                unset subject
+                unset text
+                unset confirmation
+                sleep 2
+                clear
+                end=0
+                ;;
+            n|*)
+                sleep 1
+                echo
+                echo -e "\e[1;96m  Returning to start!\e[0m"
+
+                #resetting all variables to allow new entries
+                unset answer
+                unset search
+                unset recipient
+                unset subject
+                unset text
+                unset confirmation
+                sleep 2
+                clear
+                end=0
+                ;;
+              esac
+      else
+         sleep 1
+         echo
+         echo -e "\e[1;31m  No records found for\e[0m: "$search""
+         echo
+
+         # if no record found in address book, user has the option to proceed with a different e-mail address or return to main menu
+         echo -e "\e[96m  Enter \e[0m [1]\e[96m to proceed with new e-mail address \e[0m \n  or"
+         echo -n -e "\e[31m  Enter \e[0m [0]\e[31m to return to start \e[0m\n  \e[96m[Enter]\e[0m "
+         read choice
+
+         case "$choice" in
+           1) until [[ "$recipient1" == ?*@?*.?* ]]; do
+              # check entry is valid e-mail format
+                echo
+                echo -e "\e[96m  Enter new e-mail address:\e[0m \n  or"
+                echo -n -e "  \e[31mEnter  \e[0m[0]\e[31m to return to main menu\e[0m\n  \e[96m[Enter]\e[0m "
+                read recipient1
+
+                # option to return to main menu
+                if [ "$recipient1" == 0 ];
+                  then
+                   sleep 2
+                   echo
+                   echo -e "\e[1;96m  Returning to main menu!\e[0m"
+                   sleep 2
+                   clear
+                   end=1
+                   exit
+               fi
+              done
+              echo
+              echo -n -e "\e[96m  Enter e-mail subject\e[0m: \n  [Enter]\n  "
+              read subject1
+              echo
+              echo -n -e "\e[96m  Enter e-mail text\e[0m: \n  [Enter]\n  "
+              read text1
+              echo
+              echo -n -e "\e[1;31m  This e-mail will be sent to:\e[0m "$recipient1"\n  \e[1;96mDo you wish to proceed?\e[0m\n  \e[96mEnter\e[0m [y|n] " 
+              read confirmation
+
+              case "$confirmation" in
+                y|Y)
+                  # sending the e-mail from terminal to specified new address
+                  echo "$text1" | mail -s "$subject1" "$recipient1"
+                  sleep 1
+
+                  # generating e-mail delivery report
+                  echo -e "\e[1;96m  E-mail\e[0m: "$text1": \n\n  \e[1;96mSent successfully\e[0m\n\n \e[1;96m To\e[0m: "$recipient1" "
+                  echo
+                  sleep 1
+                  echo -e "  \e[96mReturning to start\e[0m" 
+
+                  #resetting all variables to allow new entries
+                  unset answer
+                  unset search
+                  unset recipient
+                  unset subject
+                  unset text
+                  sleep 2
+                  clear
+                  end=0
+                  ;;
+
+                n|*)
+                  sleep 1
+                  echo
+                  echo -e "\e[1;96m  Returning to start!"
+                  # reset all values to allow new entries
+                  unset answer
+                  unset search
+                  unset recipient1
+                  unset subject1
+                  unset text1
+                  sleep 2
+                  clear
+                  end=0
+                  ;;
+              esac
+              ;;
+
+         0|*) sleep 1
+              echo
+              echo -e "\e[1;96m  Returning to start\e[0m" 
+              sleep 2
+              
+              # reset all values to allow new entries
+              unset answer
+              unset search
+              unset recipient
+              unset subject
+              unset text              
+              end=0
+              clear
+              ;;
+         esac                  
+      fi
+      ;;  
+      
+  2) sleep 1
+     # looking up the CustomerDetails file and printing all e-mail addresses into a new temporary file
+     grep -E -o "\b[a-zA-Z0-9.-]+@[a-zA-Z0-9.-]+\.[a-zA-Z0-9.-]+\b" CustomerDetails > tempRecipients
+     echo
+     if ! grep -q -E -o "\b[a-zA-Z0-9.-]+@[a-zA-Z0-9.-]+\.[a-zA-Z0-9.-]+\b" CustomerDetails; 
+       then
+       echo -e "\e[31m  You have no valid e-mail adresses on file!\e[0m"
+       echo
+       echo -e "\e[1;96 Returning to main menu!\e[0m"
+       sleep 2
+       clear
+       exit
+     else
+       echo -n -e "\e[96m  Enter e-mail subject\e[0m: \n  [Enter]\n  "
+       read subject
+       echo        
+       echo -n -e "\e[96m  Enter e-mail text\e[0m: \n  [Enter]\n  "
+       read text
+       echo
+       echo -n -e "\e[1;31m  This e-mail will be sent to all recipients?\e[0m\n  \e[1;96mDo you wish to proceed?\e[0m\n  \e[96mEnter\e[0m [y|n] " 
+       read confirmation
+
+       case "$confirmation" in
+         y|Y) 
+          # sending e-mail to all e-mail addresses in the temporary file
+          echo "$text" | mail -s "$subject" "$(<tempRecipients)"
+          sleep 2
+
+          # generating e-mail delivery report
+          echo
+          echo
+          echo -e "\e[1;96m  E-mail\e[0m: "$text"\n\n  \e[1;96mSent successfully\e[0m\n\n\e[1;96m  To\e[0m: "$(<tempRecipients)"\n"
+          sleep 4
+
+          # removing the temporary file with all e-mail addresses
+          rm tempRecipients
+          echo
+
+          echo -e "\e[1;96m  Returning to start!\e[0m " 
+          sleep 2
+          #reset all variables to allow new entries
+          unset answer
+          unset search
+          unset recipient
+          unset subject
+          unset text              
+          unset confirmation
+          clear
+          end=0
+          ;;
+
+        n|*)
+          sleep 2
+          echo -e "\e[1;96m  Returning to start!\e[0m"
+          #reset all variables to allow new entries
+          unset answer
+          unset search
+          unset recipient
+          unset subject
+          unset text              
+          unset confirmation
+          clear
+          end=0
+          ;;
+        esac
+    fi
+    ;;
+
+0|*) sleep 1
+     echo -e "\e[1;96m  Returning to main menu! \e[0m"
+     sleep 2
+     clear
+     end=1
+     exit
+     ;;
+esac
+done
